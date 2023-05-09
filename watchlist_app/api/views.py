@@ -8,12 +8,16 @@ from watchlist_app.api.serializers import WatchListSerializers, StreamPlatformSe
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from watchlist_app.api.permissions import IsAdminOrReadOnly, IsReviewUserOrReadOnly
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
+from watchlist_app.api.throttling import ReviewCreateThrottle, ReviewListThrottle
 
 
 class ReviewCreateView ( generics.CreateAPIView ):
     
     permission_classes = [ IsAuthenticated,]
     serializer_class = ReviewSerializers
+    throttle_classes = [ ReviewCreateThrottle, AnonRateThrottle ]
+    
     
     def get_queryset(self):
         return Review.objects.get()
@@ -41,7 +45,8 @@ class ReviewCreateView ( generics.CreateAPIView ):
 
 class ReviewList ( generics.ListAPIView ):
     # queryset = Review.objects.all()
-    permission_classes = [ IsAuthenticated,]
+    # permission_classes = [ IsAuthenticated,]
+    throttle_classes = [ ReviewListThrottle, AnonRateThrottle ]
     serializer_class = ReviewSerializers
     
     def get_queryset(self):
@@ -53,6 +58,8 @@ class ReviewDetail ( generics.RetrieveUpdateDestroyAPIView ):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializers
     permission_classes = [IsReviewUserOrReadOnly,]
+    throttle_classes = [ ScopedRateThrottle, ]
+    throttle_scope = 'review-detail'
 
     
 
@@ -80,7 +87,7 @@ class ReviewDetail ( generics.RetrieveUpdateDestroyAPIView ):
 
 class StreamPlatformView (APIView):
     
-    permission_classes = [ IsAuthenticated,]
+    permission_classes = [ IsAdminOrReadOnly,]
     serializer_class = StreamPlatformSerializer
     
     def get (self, request, *args, **kwargs):
@@ -98,7 +105,7 @@ class StreamPlatformView (APIView):
 
 class  StreamPlatformDetailView (APIView):
     
-    permission_classes = [ IsAuthenticated,]
+    permission_classes = [ IsAdminOrReadOnly,]
     serializer_class = StreamPlatformSerializer
     
     def get (self, request, pk ):
@@ -133,7 +140,7 @@ class  StreamPlatformDetailView (APIView):
 
 class WatchListView(APIView):
     
-    permission_classes = [ IsAuthenticated,]
+    permission_classes = [ IsAdminOrReadOnly,]
     serializer_class = WatchListSerializers
     
     def post (self, request, *args, **kwargs):
@@ -152,6 +159,9 @@ class WatchListView(APIView):
 
 
 class WatchListDetailView(APIView):
+    
+    permission_classes = [ IsAdminOrReadOnly,]
+    
     def get ( self, request, pk ):
         try:
             watchlists = WatchList.objects.get( pk=pk )

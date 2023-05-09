@@ -37,10 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'watchlist_app',
+    # rest framework applications
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    # my installed apps
+    'watchlist_app',
+    'user_app',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -127,15 +131,27 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ],
-    # 'DEFAULT_AUTHENTICATION_CLASSES': [
-    #     'rest_framework.authentication.BasicAuthentication',
-    # ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+
+    # 'DEFAULT_THROTTLE_CLASSES': [
+    #     'rest_framework.throttling.AnonRateThrottle',
+    #     'rest_framework.throttling.UserRateThrottle',
+    # ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/day',
+        'user': '10/day',
+        'review-create': '2/day',
+        'review-list': '10/day',
+        'review-detail': '2/day',
+    },
 }
 
+# SIMPLE_JWT ={
+#     'ROTATE_REFRESH_TOKENS': True,
+# }
 
