@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # rest framework applications
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     # my installed apps
     'watchlist_app',
     'user_app',

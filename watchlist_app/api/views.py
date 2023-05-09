@@ -10,6 +10,24 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from watchlist_app.api.permissions import IsAdminOrReadOnly, IsReviewUserOrReadOnly
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
 from watchlist_app.api.throttling import ReviewCreateThrottle, ReviewListThrottle
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
+
+
+class UserReview ( generics.ListAPIView ):
+    # queryset = Review.objects.all()
+    # permission_classes = [ IsAuthenticated,]
+    # throttle_classes = [ ReviewListThrottle, AnonRateThrottle ]
+    serializer_class = ReviewSerializers
+    
+    # def get_queryset(self):
+    #     username = self.kwargs['username']
+    #     return Review.objects.filter( user_review__username = username )
+    
+    
+    def get_queryset(self):
+        username = self.request.query_params.get('username', None)
+        return Review.objects.filter( user_review__username = username )
 
 
 class ReviewCreateView ( generics.CreateAPIView ):
@@ -48,6 +66,8 @@ class ReviewList ( generics.ListAPIView ):
     # permission_classes = [ IsAuthenticated,]
     throttle_classes = [ ReviewListThrottle, AnonRateThrottle ]
     serializer_class = ReviewSerializers
+    filter_backends = [ DjangoFilterBackend, ]
+    filterset_fields = ['user_review__username', 'active']
     
     def get_queryset(self):
         pk = self.kwargs['pk']
@@ -135,6 +155,12 @@ class  StreamPlatformDetailView (APIView):
         
 
 
+class WatchList2 ( generics.ListAPIView ):
+    
+    queryset = WatchList.objects.all()
+    serializer_class = WatchListSerializers 
+    filter_backends = [ filters.SearchFilter ]
+    search_fields = ['platform__name', 'title']
 
 
 
@@ -142,6 +168,14 @@ class WatchListView(APIView):
     
     permission_classes = [ IsAdminOrReadOnly,]
     serializer_class = WatchListSerializers
+    
+
+    def get ( self, request ):
+        
+        qs = WatchList.objects.all()
+        serializer = WatchListSerializers( qs, many = True )
+        return Response(serializer.data)
+
     
     def post (self, request, *args, **kwargs):
         serializer = WatchListSerializers( data = request.data )
@@ -151,13 +185,8 @@ class WatchListView(APIView):
         else:
             return Response(serializer.errors, status.HTTP_400_BAD_REQUEST )
 
-    def get ( self, request ):
-        
-        qs = WatchList.objects.all()
-        serializer = WatchListSerializers( qs, many = True )
-        return Response(serializer.data)
 
-
+    
 class WatchListDetailView(APIView):
     
     permission_classes = [ IsAdminOrReadOnly,]

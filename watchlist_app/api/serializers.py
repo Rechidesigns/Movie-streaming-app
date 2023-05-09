@@ -13,7 +13,8 @@ class ReviewSerializers ( serializers.ModelSerializer ):
 
 class WatchListSerializers ( serializers.ModelSerializer ):
     
-    movie_reviews = ReviewSerializers( many= True, read_only = True )
+    # movie_reviews = ReviewSerializers( many= True, read_only = True )
+    platform = serializers.CharField( source = 'platform.name')
     
     class Meta:
         model = WatchList
